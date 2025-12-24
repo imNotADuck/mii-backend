@@ -83,6 +83,8 @@ router.post(
           promptVersion: result.promptVersion,
           llmProvider: result.llmProvider,
           modeReason: result.modeReason,
+          riskLevel: result.riskLevel,
+          semanticUsed: result.semanticUsed,
         },
       };
 

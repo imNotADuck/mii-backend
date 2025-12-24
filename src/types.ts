@@ -8,12 +8,20 @@ export type ChatMessage = {
   timestamp: string;
 };
 
+export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH';
+export type Intent = 'MENTAL_HEALTH' | 'GENERAL' | 'UNKNOWN';
+
 export type InputAnalysis = {
-  intent: 'MENTAL_HEALTH' | 'GENERAL' | 'UNKNOWN';
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+  intent: Intent;
+  riskLevel: RiskLevel;
   safetyFlags: string[];
   suggestedMode: Mode;
   modeReason: string;
+  // Semantic classifier fields (optional)
+  rationale?: string;
+  semanticUsed?: boolean;
+  semanticRiskLevel?: RiskLevel;
+  semanticModeReason?: string;
 };
 
 export type BuiltPrompt = {
@@ -60,6 +68,8 @@ export type ChatResponse = {
     promptVersion: string;
     llmProvider: string;
     modeReason: string;
+    riskLevel?: RiskLevel;
+    semanticUsed?: boolean;
   };
 };
 

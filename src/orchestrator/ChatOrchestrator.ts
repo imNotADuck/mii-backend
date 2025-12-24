@@ -28,14 +28,16 @@ type OrchestratorOutput = {
   promptVersion: string;
   llmProvider: string;
   modeReason: string;
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+  semanticUsed: boolean;
 };
 
 class ChatOrchestrator {
   async handleUserMessage(input: OrchestratorInput): Promise<OrchestratorOutput> {
     const { conversationId, userMessage } = input;
 
-    // Step 1: Analyze input for intent and risk
-    const analysis = await InputAnalyzer.analyze(userMessage);
+    // Step 1: Analyze input for intent and risk (with optional semantic classification)
+    const analysis = await InputAnalyzer.analyzeWithSemantic(userMessage);
     const mode = analysis.suggestedMode;
 
     // CRISIS PATH: Skip LLM, return crisis-safe template immediately
@@ -62,6 +64,8 @@ class ChatOrchestrator {
         promptVersion: PROMPT_VERSION,
         llmProvider: 'none',
         modeReason: analysis.modeReason,
+        riskLevel: analysis.riskLevel,
+        semanticUsed: analysis.semanticUsed ?? false,
       };
     }
 
@@ -130,6 +134,8 @@ class ChatOrchestrator {
       promptVersion: PROMPT_VERSION,
       llmProvider: LLMClient.getProvider(),
       modeReason: analysis.modeReason,
+      riskLevel: analysis.riskLevel,
+      semanticUsed: analysis.semanticUsed ?? false,
     };
   }
 }

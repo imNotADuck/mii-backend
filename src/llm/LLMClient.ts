@@ -2,11 +2,18 @@ import OpenAI from 'openai';
 import { LLMRequest, LLMResponse } from '../types';
 
 class LLMClient {
-  private provider: string;
+  private provider: string | null = null;
   private openaiClient: OpenAI | null = null;
-  private openaiModel: string;
+  private openaiModel: string | null = null;
+  private initialized = false;
 
-  constructor() {
+  /**
+   * Lazy initialization - reads env vars on first use
+   * This allows dotenv to load before we read the config
+   */
+  private ensureInitialized(): void {
+    if (this.initialized) return;
+    
     this.provider = process.env.LLM_PROVIDER || 'stub';
     this.openaiModel = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
@@ -19,9 +26,13 @@ class LLMClient {
       }
       this.openaiClient = new OpenAI({ apiKey });
     }
+    
+    this.initialized = true;
   }
 
   async generate(req: LLMRequest): Promise<LLMResponse> {
+    this.ensureInitialized();
+    
     if (this.provider === 'openai') {
       return this.generateOpenAI(req);
     }
@@ -55,7 +66,7 @@ class LLMClient {
     }
 
     const completion = await this.openaiClient.chat.completions.create({
-      model: this.openaiModel,
+      model: this.openaiModel!,
       messages: req.messages.map((m) => ({
         role: m.role,
         content: m.content,
@@ -69,9 +80,9 @@ class LLMClient {
   }
 
   getProvider(): string {
-    return this.provider;
+    this.ensureInitialized();
+    return this.provider!;
   }
 }
 
 export default new LLMClient();
-
